@@ -10,4 +10,5 @@ setup(
     license='LICENSE.txt',
     description='Extension for sys module, for POSIX systems only',
     long_description=open('README.rst').read(),
+    scripts=['bin/wam-install-drupal', 'bin/wam-install-wordpress'],
 )
