@@ -10,11 +10,11 @@ import json
 import os
 import subprocess as sp
 
-from filesystem import rmdir_force, sync as dir_sync, isfile
-from pushdcontext import pushd
-import archive as ar
-import http
-import php
+from osext.filesystem import rmdir_force, sync as dir_sync, isfile
+from osext.pushdcontext import pushd
+import sysext.archive as ar
+import httpext as http
+import langutil.php as php
 
 CKEDITOR_URI = 'http://download.cksource.com/CKEditor/CKEditor/' + \
     'CKEditor%203.6.6.1/ckeditor_3.6.6.1.tar.gz'
@@ -86,12 +86,17 @@ class DrushError(Exception):
     pass
 
 
+class DrupalError(Exception):
+    pass
+
+
 class Drush:
     """Interface to Drush from Python"""
     _path = None
     _verbose = False
+    _stdout = None
 
-    def __init__(self, path, verbose=False):
+    def __init__(self, path, verbose=False, stdout=None):
         """
 
         Arguments:
@@ -99,10 +104,13 @@ class Drush:
                   init_dir() can be used to initialise
 
         Keyword Arguments:
-        verbose -- If verbose mode should be enabled (only useful for CLI)
+        verbose -- If verbose mode should be used with the drush command.
+        stdout  -- Where standard output should be written to. None for
+                    current terminal.
         """
         self._path = realpath(path)
         self._verbose = verbose
+        self._stdout = stdout
 
     def command(self, string_as_is):
         """Runs a drush command string. If the class is not in verbose mode,
@@ -119,7 +127,7 @@ class Drush:
 
             command_line.extend(split)
 
-            return sp.check_call(command_line)
+            return sp.check_call(command_line, stdout=self._stdout)
 
     def init_dir(self, major_version=7, minor_version=23, cache=True):
         """Initialises a Drupal root with a version specified.
@@ -420,7 +428,7 @@ def generate_settings_files(data):
     Returns a list of tuples: (path (str), data (PHP code, str))
     """
     if not 'default' in data:
-        raise Exception('"default" key must exist')
+        raise DrupalError('"default" key must exist')
 
     ret = []
 

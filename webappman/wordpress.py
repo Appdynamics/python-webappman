@@ -3,11 +3,11 @@
 from os import remove as rm
 from os.path import basename, dirname, join as path_join, realpath, isdir
 
-from filesystem import rmdir_force, sync as dir_sync
-import archive as ar
-import http
+from osext.filesystem import rmdir_force, sync as dir_sync
+import sysext.archive as ar
+import httpext as http
 import os
-import php
+import langutil.php as php
 
 class WordPressError(Exception):
     pass
@@ -115,7 +115,7 @@ class WordPress:
         ]
 
         line_format = 'define(%s, %s);'
-        wp_config_php = ['<?php', '// THIS FILE IS GENERATED. DO NOT MODIFY']
+        wp_config_php = ['<?php']
 
         for key in keys:
             if key in config:
