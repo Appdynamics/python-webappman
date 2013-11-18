@@ -1,0 +1,37 @@
+#!/usr/bin/env python
+
+from os.path import join as path_join, isdir, realpath
+import argparse
+import os
+import sys
+import yaml
+
+import osext.filesystem as fs
+import webappman.wordpress as wordpress
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    mysql_group = parser.add_argument_group('Database credentials')
+
+    parser.add_argument('-t', '--target-dir', required=True, help='Drupal install path')
+    mysql_group.add_argument('--db-user', default='wordpress', help='Database user name')
+    mysql_group.add_argument('--db-name', default='wordpress', help='Database name')
+    mysql_group.add_argument('--db-password', default='', help='Database user password')
+    mysql_group.add_argument('--db-host', default='localhost', help='Database host')
+
+    args = parser.parse_args()
+
+    target_dir = realpath(args.target_dir)
+    wp = wordpress.WordPress(target_dir)
+    cur_path = os.getcwd()
+    settings_path = realpath(path_join(cur_path, '..', 'blog', 'settings.yml'))
+
+    if isdir(target_dir) and os.listdir(target_dir):
+        fs.rmdir_force(target_dir)
+
+    wp.init_dir(config={
+        'db_name': args.db_name,
+        'db_password': args.db_password,
+        'db_user': args.db_user,
+        'db_host': args.db_host,
+    })

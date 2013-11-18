@@ -1,0 +1,115 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# Detect Python that is not version 2 and try to use python2 if it is in PATH
+from os.path import isdir, join as path_join, realpath, abspath, dirname
+import inspect
+import sys
+import subprocess as sp
+
+try:
+    major_version = sys.version_info.major
+except AttributeError:
+    major_version = sys.version_info[0]
+
+if major_version != 2:
+    python_2_path = str(sp.check_output('which python2', shell=True))
+    python_2_path = python_2_path[2:-3]
+    this_script = abspath(inspect.getfile(inspect.currentframe()))
+    args = sys.argv
+    command_line = [python_2_path, this_script]
+
+    if 'python' not in args[0]:
+        args = args[1:]
+    else:
+        args = args[2:]
+
+    command_line.extend(args)
+
+    try:
+        sp.call(command_line)
+    except OSError:
+        print('Unable to find Python 2. This script requires Python 2 to run')
+        sys.exit(1)
+
+    sys.exit(0)
+
+from os import remove as rm, symlink
+import argparse
+import MySQLdb as mysql_main
+import os
+
+import osext.filesystem as fs
+import webappman.drupal as drupal
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    drupal_mysql_group = parser.add_argument_group('Database credentials')
+
+    parser.add_argument('-t', '--target-dir', required=True, help='Drupal install path')
+    parser.add_argument('-v', '--verbose', action='store_true')
+    parser.add_argument('--ignore-dl-errors', action='store_true', help='Ignore drush dl failures')
+    parser.add_argument('--no-cache', action='store_true', help='Never use cache with drush dl')
+    parser.add_argument('--remove-extra-files', action='store_true', help='Remove extraneous files (*.txt etc)')
+    parser.add_argument('--version', default='7.23', help='Drupal version')
+    drupal_mysql_group.add_argument('--db-username', default='drupal', help='Database user name')
+    drupal_mysql_group.add_argument('--db-name', default='drupal', help='Database name')
+    drupal_mysql_group.add_argument('--db-password', default='', help='Database user password')
+    drupal_mysql_group.add_argument('--db-host', default='localhost', help='Database host')
+    drupal_mysql_group.add_argument('--db-port', type=int, default=3306, help='Database port')
+    drupal_mysql_group.add_argument('--db-driver', default='mysql', help='Database driver')
+    drupal_mysql_group.add_argument('--db-prefix', default='', help='Table prefix')
+
+    args = parser.parse_args()
+
+    target_dir = args.target_dir
+    drush = drupal.Drush(target_dir, verbose=args.verbose)
+
+    if isdir(target_dir) and os.listdir(target_dir):
+        fs.rmdir_force(target_dir)
+
+    version = [int(x) for x in args.version.split('.')]
+    major = version[0]
+    minor = version[1]
+    drush.init_dir(cache=not args.no_cache, major_version=major, minor_version=minor)
+    drush.dl('registry_rebuild', cache=not args.no_cache)
+    drush.create_libraries_dir()
+
+    data = drupal.generate_settings_files({
+        'default': {
+            'databases': {
+                'default': {
+                    'default': {
+                        'database': args.db_name,
+                        'username': args.db_username,
+                        'password': args.db_password,
+                        'host': args.db_host,
+                        'port': args.db_port,
+                        'driver': args.db_driver,
+                        'prefix': args.db_prefix,
+                    },
+                },
+            },
+            'conf': {
+                '404_fast_paths_exclude': '/\/(?:styles)\//',
+                '404_fast_paths': '/\.(?:txt|png|gif|jpe?g|css|js|ico|swf|flv|cgi|bat|pl|dll|exe|asp)$/i',
+                '404_fast_html': '<html xmlns="http://www.w3.org/1999/xhtml"><head><title>404 Not Found</title></head><body><h1>Not Found</h1><p>The requested URL "@path" was not found on this server.</p></body></html>',
+            },
+            'drupal_hash_salt': 'random_string',
+            'update_free_access': False,
+            'ini_set': {
+                'session.gc_probability': 1,
+                'session.gc_divisor': 1,
+                'session.gc_maxlifetime': 200000,
+                'session.cookie_lifetime': 200000,
+            }
+        },
+    })
+
+    for (path, code) in data:
+        path = target_dir + '/' + path
+        with open(path, 'w+') as f:
+            f.write('<?php\n' + code + '\n')
+
+    if args.verbose:
+        print('Customise sites/default/settings.php if necessary')
