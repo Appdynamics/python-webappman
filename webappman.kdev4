@@ -1,0 +1,4 @@
+[Project]
+Manager=KDevGenericManager
+Name=webappman
+VersionControl=kdevgit
