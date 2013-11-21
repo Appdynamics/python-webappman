@@ -263,6 +263,16 @@ class Drush:
         """
         return self.command('en -y %s' % (module_name))
 
+
+    def dis(self, module_name):
+        """Disable module front-end method.
+
+        Arguments:
+        module_name -- str, system module name
+        """
+        self.command('dis -y %s' % (module_name))
+
+
     def install_lib(self, library_name, stdout=None):
         """Installs a library into sites/all/libraries (usually).
 
