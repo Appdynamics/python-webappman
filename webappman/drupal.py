@@ -249,7 +249,7 @@ class Drush:
 
         args = (format, shell_quote(variable_name), shell_quote(value))
 
-        return self.command('vset --format=%s %s %s' % args)
+        return self.command('vset -y --format=%s %s %s' % args)
 
     def updb(self):
         """Update database front-end method. Use with caution."""
