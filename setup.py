@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name='WebAppManager',
-    version='0.1.2',
+    version='0.1.3',
     author='Andrew Udvare',
     author_email='audvare@gmail.com',
     packages=['webappman'],
