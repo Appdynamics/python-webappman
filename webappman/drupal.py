@@ -129,7 +129,7 @@ class Drush:
 
             return sp.check_call(command_line, stdout=self._stdout)
 
-    def init_dir(self, major_version=7, minor_version=23, cache=True):
+    def init_dir(self, major_version=7, minor_version=24, cache=True):
         """Initialises a Drupal root with a version specified.
 
         Kwargs:
