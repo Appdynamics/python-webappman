@@ -51,7 +51,7 @@ if __name__ == '__main__':
     parser.add_argument('--ignore-dl-errors', action='store_true', help='Ignore drush dl failures')
     parser.add_argument('--no-cache', action='store_true', help='Never use cache with drush dl')
     parser.add_argument('--remove-extra-files', action='store_true', help='Remove extraneous files (*.txt etc)')
-    parser.add_argument('--version', default='7.23', help='Drupal version')
+    parser.add_argument('--version', default='7.24', help='Drupal version')
     drupal_mysql_group.add_argument('--db-username', default='drupal', help='Database user name')
     drupal_mysql_group.add_argument('--db-name', default='drupal', help='Database name')
     drupal_mysql_group.add_argument('--db-password', default='', help='Database user password')
