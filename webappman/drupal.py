@@ -113,15 +113,16 @@ class Drush:
         self._verbose = verbose
         self._stdout = stdout
 
-        with pushd(self._path):
-            site_dirs = [x
-                        for x in os.listdir('sites')
-                        if isdir(os.path.join('sites', x)) and
-                        x not in ['all', 'default']]
-            for item in site_dirs:
-                self._uris.append('http://%s' % (item))
+        if isdir(self._path):
+            with pushd(self._path):
+                site_dirs = [x
+                            for x in os.listdir('sites')
+                            if isdir(os.path.join('sites', x)) and
+                            x not in ['all', 'default']]
+                for item in site_dirs:
+                    self._uris.append('http://%s' % (item))
 
-            self._uris.sort()
+                self._uris.sort()
 
     def command(self, string_as_is):
         """Runs a drush command string. If the class is not in verbose mode,
@@ -140,16 +141,18 @@ class Drush:
 
             sp.check_call(command_line, stdout=self._stdout)
 
-            if len(self._uris):
-                for uri in self._uris:
-                    command_line = ['drush', '--uri=%s' % (uri)]
+            for uri in self._uris:
+                command_line = ['drush', '--uri=%s' % (uri)]
 
-                    if not self._verbose:
-                        command_line.append('-q')
+                if not self._verbose:
+                    command_line.append('-q')
 
-                    command_line.extend(split)
+                command_line.extend(split)
 
-                    sp.check_call(command_line, stdout=self._stdout)
+                sp.check_call(command_line, stdout=self._stdout)
+
+    def add_uri(self, uri):
+        self._uris.append(uri)
 
     def init_dir(self, major_version=7, minor_version=24, cache=True):
         """Initialises a Drupal root with a version specified.
