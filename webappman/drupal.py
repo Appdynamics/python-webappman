@@ -95,6 +95,7 @@ class Drush:
     _path = None
     _verbose = False
     _stdout = None
+    _uris = []
 
     def __init__(self, path, verbose=False, stdout=None):
         """
@@ -112,6 +113,16 @@ class Drush:
         self._verbose = verbose
         self._stdout = stdout
 
+        with pushd(self._path):
+            site_dirs = [x
+                        for x in os.listdir('sites')
+                        if isdir(os.path.join('sites', x)) and
+                        x not in ['all', 'default']]
+            for item in site_dirs:
+                self._uris.append('http://%s' % (item))
+
+            self._uris.sort()
+
     def command(self, string_as_is):
         """Runs a drush command string. If the class is not in verbose mode,
             -q argument will be added
@@ -127,7 +138,18 @@ class Drush:
 
             command_line.extend(split)
 
-            return sp.check_call(command_line, stdout=self._stdout)
+            sp.check_call(command_line, stdout=self._stdout)
+
+            if len(self._uris):
+                for uri in self._uris:
+                    command_line = ['drush', '--uri=%s' % (uri)]
+
+                    if not self._verbose:
+                        command_line.append('-q')
+
+                    command_line.extend(split)
+
+                    sp.check_call(command_line, stdout=self._stdout)
 
     def init_dir(self, major_version=7, minor_version=24, cache=True):
         """Initialises a Drupal root with a version specified.
@@ -249,7 +271,7 @@ class Drush:
 
         args = (format, shell_quote(variable_name), shell_quote(value))
 
-        return self.command('vset -y --format=%s %s %s' % args)
+        return self.command('vset --exact -y --format=%s %s %s' % args)
 
     def updb(self):
         """Update database front-end method. Use with caution."""
@@ -263,7 +285,6 @@ class Drush:
         """
         return self.command('en -y %s' % (module_name))
 
-
     def dis(self, module_name):
         """Disable module front-end method.
 
@@ -271,7 +292,6 @@ class Drush:
         module_name -- str, system module name
         """
         self.command('dis -y %s' % (module_name))
-
 
     def install_lib(self, library_name, stdout=None):
         """Installs a library into sites/all/libraries (usually).
