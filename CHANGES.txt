@@ -1,5 +1,9 @@
+v0.1.7, 2013-11-22 -- Fix setting variable when variable is new;
+                      automatically handle multi-site installations
 v0.1.6, 2013-11-21 -- Update Drupal version in utility
-v0.1.5, 2013-11-21 -- Conflict caused old variant to be uploaded, merged 1.3 and 1.4
+v0.1.5, 2013-11-21 -- Conflict caused old variant to be uploaded, merged 1.3
+                      and 1.4
 v0.1.4, 2013-11-21 -- Answer yes to vset when variable is new
-v0.1.3, 2013-11-20 -- Update default Drupal version to 7.24, add dis() (disable module) method to Drush class
+v0.1.3, 2013-11-20 -- Update default Drupal version to 7.24, add dis()
+                      (disable module) method to Drush class
 v0.1.0, 2013-11-14 -- Initial release.
