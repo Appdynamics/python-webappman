@@ -1,3 +1,6 @@
+v0.1.9, 2013-11-27 -- Make WordPress installer use a temporary directory for
+                      initial extraction of zip file; use sh to get an unzip
+                      command
 v0.1.8, 2013-11-22 -- Fix __init__ when installation is not yet initialised;
                       add add_uri() method to Drush class
 v0.1.7, 2013-11-22 -- Fix setting variable when variable is new;

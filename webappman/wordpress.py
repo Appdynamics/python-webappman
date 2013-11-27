@@ -2,9 +2,10 @@
 
 from os import remove as rm
 from os.path import basename, dirname, join as path_join, realpath, isdir
+from sh import unzip
+import tempfile
 
 from osext.filesystem import rmdir_force, sync as dir_sync
-import sysext.archive as ar
 import httpext as http
 import os
 import langutil.php as php
@@ -76,18 +77,13 @@ class WordPress:
             cache = False
 
         prev_listing = os.listdir('.')
+        dir_name = path_join(tempfile.gettempdir(), '__wp__')
 
         http.dl(uri, '_wp.zip', cache=cache)
-        ar.unzip('_wp.zip')
+        unzip(['-d', dir_name, '_wp.zip'])
         rm('_wp.zip')
 
-        new_listing = os.listdir('.')
-        diff = self._diff_list(prev_listing, new_listing)
-
-        if len(diff) == 0:
-            raise WordPressError('Directory listing not changed after unzip operation')
-
-        dir_name = diff[0]
+        dir_name = path_join(dir_name, 'wordpress')
         os.rename(dir_name, self._path)
 
         defaults = {
