@@ -4,6 +4,7 @@
 # Detect Python that is not version 2 and try to use python2 if it is in PATH
 from os.path import isdir, join as path_join, realpath, abspath, dirname
 import inspect
+import re
 import sys
 import subprocess as sp
 
@@ -18,8 +19,9 @@ if major_version != 2:
     this_script = abspath(inspect.getfile(inspect.currentframe()))
     args = sys.argv
     command_line = [python_2_path, this_script]
+    has_python_in_arg_0 = re.match(r'python[23](\..+)?$', args[0])
 
-    if 'python' not in args[0]:
+    if not has_python_in_arg_0:
         args = args[1:]
     else:
         args = args[2:]
