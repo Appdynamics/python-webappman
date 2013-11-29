@@ -4,15 +4,15 @@
 from os import remove as rm
 from os.path import isdir, join as path_join, realpath, basename
 from pipes import quote as shell_quote
+from sh import tar, unzip
 from shlex import split as shell_split
-from shutil import copy2 as copy_file
+from shutil import copy2 as copy_file, rmtree as rmdir_force
 import json
 import os
 import subprocess as sp
 
-from osext.filesystem import rmdir_force, sync as dir_sync, isfile
+from osext.filesystem import sync as dir_sync, isfile
 from osext.pushdcontext import pushd
-import sysext.archive as ar
 import httpext as http
 import langutil.php as php
 
@@ -27,8 +27,17 @@ SIMPLEPIE_URI = 'http://simplepie.org/downloads/simplepie_1.3.1.compiled.php'
 
 def _install_ckeditor(stdout=None):
     """Callback to install necessary library for the IMCE module"""
+    arg = 'xf'
+
+    if stdout:
+        arg += 'v'
+
     http.dl(CKEDITOR_URI, 'ckeditor.tar.gz')
-    ar.untar('ckeditor.tar.gz')
+    output = tar('xf', 'ckeditor.tar.gz')
+
+    if stdout and output:
+        stdout.write(str(output).strip() + '\n')
+
     rm('ckeditor.tar.gz')
 
 
@@ -37,14 +46,22 @@ def _install_jquery_colorpicker(stdout=None):
     os.makedirs('./colorpicker')
     http.dl(JQ_COLOR_PICKER_URI, './colorpicker/colorpicker.zip')
     with pushd('./colorpicker'):
-        ar.unzip('colorpicker.zip', stdout=stdout)
+        output = unzip('colorpicker.zip')
+
+        if stdout and output:
+            stdout.write(str(output).strip() + '\n')
+
         rm('colorpicker.zip')
 
 
 def _install_fancybox(stdout=None):
     """Callback to install necessary library for the Fancybox module"""
     http.dl(FANCYBOX_URI, 'fancybox.zip')
-    ar.unzip('fancybox.zip', stdout=stdout)
+    output = unzip('fancybox.zip')
+
+    if stdout and output:
+        stdout.write(str(output).strip() + '\n')
+
     os.rename('fancyapps-fancyBox-18d1712', 'fancybox')
     rm('fancybox.zip')
 
@@ -58,7 +75,11 @@ def _install_jquery_cycle(stdout=None):
 def _install_predis(stdout=None):
     """Callback to install Predis for the Redis module"""
     http.dl(PREDIS_URI, 'predis.zip')
-    ar.unzip('predis.zip', stdout=stdout)
+    output = unzip('predis.zip')
+
+    if stdout and output:
+        stdout.write(str(output).strip() + '\n')
+
     os.rename('nrk-predis-d02e2e1', 'predis')
     rm('predis.zip')
 
@@ -321,7 +342,8 @@ class Drush:
 
         with pushd(path_join(self._path, 'sites', 'all', 'libraries')):
             # library_name is also supposed to be the directory target
-            rmdir_force(library_name)
+            if isdir(library_name):
+                rmdir_force(library_name)
             _lib_hooks[library_name](stdout=stdout)
 
     def fix_registry_table(self,
