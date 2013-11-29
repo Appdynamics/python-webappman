@@ -41,7 +41,7 @@ import argparse
 import MySQLdb as mysql_main
 import os
 
-import osext.filesystem as fs
+from shutil import rmtree as rmdir_force
 import webappman.drupal as drupal
 
 if __name__ == '__main__':
@@ -68,7 +68,7 @@ if __name__ == '__main__':
     drush = drupal.Drush(target_dir, verbose=args.verbose)
 
     if isdir(target_dir) and os.listdir(target_dir):
-        fs.rmdir_force(target_dir)
+        rmdir_force(target_dir)
 
     version = [int(x) for x in args.version.split('.')]
     major = version[0]
