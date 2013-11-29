@@ -206,6 +206,18 @@ class Drush:
 
         os.makedirs(path_join(self._path, 'sites', 'all', 'libraries'))
 
+    def _handle_dl(self, command_line):
+        try:
+            sp.check_call(command_line)
+        except sp.CalledProcessError as e:
+            # Most of the time this is caused by a bad checksum
+            if ignore_errors:
+                pass
+
+            raise DrushError('Non-zero status %d. Run in verbose mode and'
+                                'check output for [error] line' %
+                                (e.returncode))
+
     def dl(self, module_names, cache=True, ignore_errors=False):
         """Downloads modules.
 
@@ -232,17 +244,15 @@ class Drush:
 
         command_line.extend(module_names)
 
-        with pushd(self._path):
-            try:
-                sp.check_call(command_line)
-            except sp.CalledProcessError as e:
-                # Most of the time this is caused by a bad checksum
-                if ignore_errors:
-                    pass
+        dir_exceptions = [
+            'registry_rebuild',
+        ]
 
-                raise DrushError('Non-zero status %d. Run in verbose mode and'
-                                 'check output for [error] line' %
-                                 (e.returncode))
+        if len(module_names) == 1 and module_names[0].lower() in dir_exceptions:
+            return self._handle_dl(command_line)
+
+        with pushd(self._path):
+            self._handle_dl(command_line)
 
     def rr(self):
         """Rebuild registry front-end method."""
