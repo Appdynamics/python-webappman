@@ -134,7 +134,7 @@ class Drush:
         self._verbose = verbose
         self._stdout = stdout
 
-        if isdir(self._path):
+        if isdir(self._path) and isdir(path_join(self._path, 'sites')):
             with pushd(self._path):
                 site_dirs = [x
                             for x in os.listdir('sites')
