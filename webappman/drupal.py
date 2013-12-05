@@ -173,6 +173,9 @@ class Drush:
                 sp.check_call(command_line, stdout=self._stdout)
 
     def add_uri(self, uri):
+        if uri in self._uris:
+            return
+
         self._uris.append(uri)
 
     def init_dir(self, major_version=7, minor_version=24, cache=True):
