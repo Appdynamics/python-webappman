@@ -1,3 +1,4 @@
+v0.2.1, 2013-12-05 -- Fixes for multi-site installations.
 v0.2.0, 2013-11-28 -- Remove dependency on deprecated SysExtension.
 v0.1.9, 2013-11-27 -- Make WordPress installer use a temporary directory for
                       initial extraction of zip file; use sh to get an unzip
