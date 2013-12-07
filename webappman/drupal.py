@@ -9,6 +9,7 @@ from shlex import split as shell_split
 from shutil import copy2 as copy_file, rmtree as rmdir_force
 import json
 import os
+import re
 import subprocess as sp
 
 from osext.filesystem import sync as dir_sync, isfile
@@ -145,11 +146,15 @@ class Drush:
 
                 self._uris.sort()
 
-    def command(self, string_as_is):
+    def command(self, string_as_is, ignore_errors=False):
         """Runs a drush command string. If the class is not in verbose mode,
             -q argument will be added
+           ignore_errors may want to be used for commands that exit with
+             non-zero status but are not always errors (like reverting a view
+             that may not exist)
 
         command('en -y module_name')
+        command('views-revert my_nonexisting_view', ignore_errors=True)
         """
         with pushd(self._path):
             split = shell_split(string_as_is)
@@ -159,10 +164,19 @@ class Drush:
                 command_line.append('-q')
 
             command_line.extend(split)
+            if self._verbose and self._stdout:
+                self._stdout.write(' '.join(command_line) + '\n')
 
-            sp.check_call(command_line, stdout=self._stdout)
+            try:
+                sp.check_call(command_line, stdout=self._stdout)
+            except sp.CalledProcessError as e:
+                if not ignore_errors:
+                    raise e
 
             for uri in self._uris:
+                if re.match(r'^https?\://default$', uri):
+                    continue
+
                 command_line = ['drush', '--uri=%s' % (uri)]
 
                 if not self._verbose:
@@ -170,7 +184,14 @@ class Drush:
 
                 command_line.extend(split)
 
-                sp.check_call(command_line, stdout=self._stdout)
+                if self._verbose and self._stdout:
+                    self._stdout.write(' '.join(command_line) + '\n')
+
+                try:
+                    sp.check_call(command_line, stdout=self._stdout)
+                except sp.CalledProcessError as e:
+                    if not ignore_errors:
+                        raise e
 
     def add_uri(self, uri):
         if uri in self._uris:
