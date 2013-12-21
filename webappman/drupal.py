@@ -331,6 +331,26 @@ class Drush:
 
         return self.command('vset --exact -y --format=%s %s %s' % args)
 
+    def vset_many(self, dict_of_vars, mysql_connection):
+        """Set many variables at once using a MySQL connection object and a
+             dictionary of values. Use this instead of vset() when many values
+             need to be set quickly.
+
+        Arguments:
+        dict_of_vars     -- dict, dictionary of variables to values to set
+        mysql_connection -- MySQLdb.connection, open connection to MySQL to
+                            correct Drupal database
+        """
+        c = mysql_connection.cursor()
+
+        for (key, value) in dict_of_vars.items():
+            value = php.serialize(value)
+            print(value)
+            c.execute('INSERT INTO variable (name, value) VALUES (%s, %s) ON DUPLICATE KEY UPDATE value=%s', args=(key, value, value,))
+
+        mysql_connection.commit()
+
+
     def updb(self):
         """Update database front-end method. Use with caution."""
         return self.command('updb -y')
