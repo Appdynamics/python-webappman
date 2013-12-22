@@ -350,6 +350,8 @@ class Drush:
 
         mysql_connection.commit()
 
+        self.cc()
+
 
     def updb(self):
         """Update database front-end method. Use with caution."""
