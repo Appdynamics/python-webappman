@@ -345,12 +345,9 @@ class Drush:
 
         for (key, value) in dict_of_vars.items():
             value = php.serialize(value)
-            print(value)
             c.execute('INSERT INTO variable (name, value) VALUES (%s, %s) ON DUPLICATE KEY UPDATE value=%s', args=(key, value, value,))
 
         mysql_connection.commit()
-
-        self.cc()
 
 
     def updb(self):
