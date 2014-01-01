@@ -10,6 +10,7 @@ import httpext as http
 import os
 import langutil.php as php
 
+
 class WordPressError(Exception):
     pass
 
@@ -91,10 +92,14 @@ class WordPress:
             'db_charset': 'utf8',
             'db_collate': '',
             'wplang': '',
-            'auth_key': ',Qi8F3A:ME>+!G*|a!>zbW!GWe,A9rHR@tL.4sFCE}LR0][j/995U+4*3H:i]]DH',
-            'secure_auth_key': 'UjN_-SP+Whq/^taB31&lg$fj0-<XSgKy@UzK*B-k-4aiT9~m^s_vT[dE,5P;kx(E',
-            'logged_in_key': '2dfV^z4rJqrSEdQc.ec)KJC UZv$#)OhJKRY~Vj9+]M-]CIBL(RvGZ|[C!S|]MOv',
-            'nonce_key': '.Ue WG1NN/cKo^MC53$_U0!V>Mtdw-ar$rP8o+;rawQ)B$9LlAAL<@GLoXS_POaa',
+            'auth_key': ',Qi8F3A:ME>+!G*|a!>zbW!GWe,A9rHR@tL.4sFCE}LR0][j/995U'
+                        '+4*3H:i]]DH',
+            'secure_auth_key': 'UjN_-SP+Whq/^taB31&lg$fj0-<XSgKy@UzK*B-k-4aiT9'
+                               '~m^s_vT[dE,5P;kx(E',
+            'logged_in_key': '2dfV^z4rJqrSEdQc.ec)KJC UZv$#)OhJKRY~Vj9+]M-]CIB'
+                             'L(RvGZ|[C!S|]MOv',
+            'nonce_key': '.Ue WG1NN/cKo^MC53$_U0!V>Mtdw-ar$rP8o+;rawQ)B$9LlAAL'
+                         '<@GLoXS_POaa',
         }
         keys = [
             'db_name',
@@ -119,11 +124,15 @@ class WordPress:
             elif key in defaults:
                 value = defaults[key]
             else:
-                raise WordPressConfigError('Configuration key %s is required' % (key))
+                raise WordPressConfigError('Configuration key %s is required' %
+                                           (key))
 
-            wp_config_php.append(line_format % (php.generate_scalar(key.upper()), php.generate_scalar(value)))
+            wp_config_php.append(line_format %
+                                 (php.generate_scalar(key.upper()),
+                                  php.generate_scalar(value)))
 
-        wp_config_php.append('$table_prefix = %s;' % (php.generate_scalar(table_prefix)))
+        wp_config_php.append('$table_prefix = %s;' %
+                             (php.generate_scalar(table_prefix)))
 
         lines = '\n'.join(wp_config_php) + '\n'
         lines += '''if (!defined('ABSPATH'))

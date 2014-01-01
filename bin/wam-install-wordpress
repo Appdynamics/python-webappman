@@ -14,11 +14,16 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     mysql_group = parser.add_argument_group('Database credentials')
 
-    parser.add_argument('-t', '--target-dir', required=True, help='Drupal install path')
-    mysql_group.add_argument('--db-user', default='wordpress', help='Database user name')
-    mysql_group.add_argument('--db-name', default='wordpress', help='Database name')
-    mysql_group.add_argument('--db-password', default='', help='Database user password')
-    mysql_group.add_argument('--db-host', default='localhost', help='Database host')
+    parser.add_argument('-t', '--target-dir', required=True,
+                        help='Drupal install path')
+    mysql_group.add_argument('--db-user', default='wordpress',
+                             help='Database user name')
+    mysql_group.add_argument('--db-name', default='wordpress',
+                             help='Database name')
+    mysql_group.add_argument('--db-password', default='',
+                             help='Database user password')
+    mysql_group.add_argument('--db-host', default='localhost',
+                             help='Database host')
 
     args = parser.parse_args()
 

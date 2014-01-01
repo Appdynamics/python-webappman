@@ -138,9 +138,9 @@ class Drush:
         if isdir(self._path) and isdir(path_join(self._path, 'sites')):
             with pushd(self._path):
                 site_dirs = [x
-                            for x in os.listdir('sites')
-                            if isdir(os.path.join('sites', x)) and
-                            x not in ['all', 'default']]
+                             for x in os.listdir('sites')
+                             if isdir(os.path.join('sites', x)) and
+                             x not in ['all', 'default']]
                 for item in site_dirs:
                     self._uris.append('http://%s' % (item))
 
@@ -260,8 +260,8 @@ class Drush:
                 pass
 
             raise DrushError('Non-zero status %d. Run in verbose mode and'
-                                'check output for [error] line' %
-                                (e.returncode))
+                             'check output for [error] line' %
+                             (e.returncode))
 
     def dl(self, module_names, cache=True, ignore_errors=False):
         """Downloads modules.
@@ -293,7 +293,8 @@ class Drush:
             'registry_rebuild',
         ]
 
-        if len(module_names) == 1 and module_names[0].lower() in dir_exceptions:
+        if len(module_names) == 1 and \
+                module_names[0].lower() in dir_exceptions:
             return self._handle_dl(command_line)
 
         with pushd(self._path):
@@ -345,10 +346,11 @@ class Drush:
 
         for (key, value) in dict_of_vars.items():
             value = php.serialize(value)
-            c.execute('INSERT INTO variable (name, value) VALUES (%s, %s) ON DUPLICATE KEY UPDATE value=%s', args=(key, value, value,))
+            c.execute('INSERT INTO variable (name, value) VALUES '
+                      '(%s, %s) ON DUPLICATE KEY UPDATE value=%s',
+                      args=(key, value, value,))
 
         mysql_connection.commit()
-
 
     def updb(self):
         """Update database front-end method. Use with caution."""
