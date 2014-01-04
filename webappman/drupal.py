@@ -251,7 +251,7 @@ class Drush:
 
         os.makedirs(path_join(self._path, 'sites', 'all', 'libraries'))
 
-    def _handle_dl(self, command_line):
+    def _handle_dl(self, command_line, ignore_errors=False):
         try:
             sp.check_call(command_line)
         except sp.CalledProcessError as e:
@@ -295,10 +295,10 @@ class Drush:
 
         if len(module_names) == 1 and \
                 module_names[0].lower() in dir_exceptions:
-            return self._handle_dl(command_line)
+            return self._handle_dl(command_line, ignore_errors)
 
         with pushd(self._path):
-            self._handle_dl(command_line)
+            self._handle_dl(command_line, ignore_errors)
 
     def rr(self):
         """Rebuild registry front-end method."""
