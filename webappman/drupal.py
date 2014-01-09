@@ -202,7 +202,7 @@ class Drush:
 
         self._uris.append(uri)
 
-    def init_dir(self, major_version=7, minor_version=24, cache=True):
+    def init_dir(self, major_version=7, minor_version=25, cache=True):
         """Initialises a Drupal root with a version specified.
 
         Kwargs:
