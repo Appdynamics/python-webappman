@@ -146,7 +146,7 @@ class Drush:
 
                 self._uris.sort()
 
-    def command(self, string_as_is, ignore_errors=False):
+    def command(self, string_as_is, ignore_errors=False, once=False):
         """Runs a drush command string. If the class is not in verbose mode,
             -q argument will be added
            ignore_errors may want to be used for commands that exit with
@@ -172,6 +172,9 @@ class Drush:
             except sp.CalledProcessError as e:
                 if not ignore_errors:
                     raise e
+
+            if once:
+                return
 
             for uri in self._uris:
                 if re.match(r'^https?\://default$', uri):
