@@ -1,3 +1,4 @@
+v0.2.4, 2014-01-09 -- Update Drupal version to 7.25
 v0.2.3, 2014-01-08 -- Add 'once' argument to command() so a command that only
                       needs to be run once can be specified to do so
 v0.2.2, 2013-12-22 -- Add vset_many() method for a quick way to set many
