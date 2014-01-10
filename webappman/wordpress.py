@@ -31,7 +31,6 @@ class WordPress:
 
     def __init__(self, path):
         """
-
         Args:
             path (str): Path to installation. Does not have to exist as
               init_dir() can be used to initialise a new installation.
