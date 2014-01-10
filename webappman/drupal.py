@@ -492,12 +492,28 @@ class Drush:
             os.remove(path)
 
 
-def is_production():
+def is_production(info_file='/etc/node_type'):
     """Based on DRUPAL_ENV environment variable, determines if the server is in
-         production mode."""
+         production mode.
+
+    Also can read the first line from a specified file to determine if the
+      string (lower-cased) == 'prod'.
+
+    Arguments:
+    info_file -- File to read from for environment type. For this function to
+      return ``True``, the file's first line must say ``prod`` exactly. If the
+      file cannot be opened, the environment variable ``DRUPAL_ENV`` will be
+      checked for.
+    """
     try:
-        if os.environ['DRUPAL_ENV'] == 'prod':
-            return True
+        with open('/etc/node_type') as f:
+            for line in f.readlines():
+                return line.strip().lower() == 'prod'
+    except IOError:
+        pass
+
+    try:
+        return os.environ['DRUPAL_ENV'] == 'prod'
     except KeyError:
         pass
 
