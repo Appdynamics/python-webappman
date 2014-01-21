@@ -243,7 +243,7 @@ class Drush:
 
             os.makedirs(path_join(self._path, 'sites', 'default', 'files',
                                   'tmp'),
-                        0770)
+                        504)  # 0770, or 0o770 in Python 3
 
     def create_libraries_dir(self):
         """Creates the sites/all/libraries directory. Root path must exist."""
