@@ -1,6 +1,12 @@
 #coding: utf-8
 """For Drupal site deployment and management"""
 
+from __future__ import print_function
+from bs4 import BeautifulSoup as Soup
+try:
+    from http.cookiejar import CookieJar
+except ImportError:
+    from cookielib import CookieJar
 from os import remove as rm
 from os.path import isdir, join as path_join, realpath, basename
 from pipes import quote as shell_quote
@@ -11,6 +17,12 @@ import json
 import os
 import re
 import subprocess as sp
+try:
+    from urllib.parse import urlencode
+    from urllib.request import build_opener, HTTPCookieProcessor
+except ImportError:
+    from urllib import urlencode
+    from urllib2 import build_opener, HTTPCookieProcessor
 
 from osext.filesystem import sync as dir_sync, isfile
 from osext.pushdcontext import pushd
@@ -118,6 +130,7 @@ class Drush:
     _verbose = False
     _stdout = None
     _uris = []
+    _cookie_processor = None
 
     def __init__(self, path, verbose=False, stdout=None):
         """
@@ -490,6 +503,59 @@ class Drush:
         for file_name in extra_files:
             path = path_join(self._path, file_name)
             os.remove(path)
+
+    #def _init_browser():
+        #if self._cookie_processor:
+            #return
+
+        #cookie_jar = CookieJar()
+        #self._cookie_processor = HTTPCookieProcessor(cookie_jar)
+
+    #def get_urlopener(self):
+        #self._init_browser()
+        #return build_opener(self._cookie_processor)
+
+    #def _get_session(self,
+                     #username,
+                     #password,
+                     #protocol='http',
+                     #add_headers=None):
+        #opener = self.get_urlopener()
+        #opener.add_headers = headers
+
+        ## Login data
+        #data = [
+            #('name', username),
+            #('pass', password),
+            #('op', 'Log in'),
+        #]
+
+        ## Get CSRF
+        #response = opener.open('%s://%s/user' % (protocol, host))
+        #soup = Soup(response.read(), 'html5lib')
+        #hiddens = soup.body.sellect('#user-login input[type="hidden"]')
+        #for field in hiddens:
+            #data.append((field['name'], field['value']))
+
+        ## Perform login
+        #data = urlencode(data).encode('utf-8')
+        #response = opener.open('%s://%s/user', data=data)
+        #soup = Soup(response.read(), 'html5lib')
+
+        #try:
+            #if soup.body.select('#page-title')[0].contents[0] != username:
+                #raise DrupalError('Failed to log in')
+        #except IndexError:
+            #raise DrupalError('Failed to log in')
+
+    #def post_form(self,
+                  #username,
+                  #password,
+                  #path,
+                  #data=None,
+                  #uris=None,
+                  #add_headers=None):
+        #self._get_session(add_headers=add_headers)
 
 
 def is_production(info_file='/etc/node_type'):
