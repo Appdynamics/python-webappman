@@ -209,6 +209,46 @@ class Drush:
                     if not ignore_errors:
                         raise e
 
+    def command_output(self, string_as_is, once=False):
+        """Like command() but returns the output, in a list format:
+             [(site_name, stripped_data)]"""
+        with pushd(self._path):
+            split = shell_split(string_as_is)
+            command_line = ['drush']
+            ret = []
+
+            if not self._verbose:
+                command_line.append('-q')
+
+            command_line.extend(split)
+            if self._verbose and self._stdout:
+                self._stdout.write(' '.join(command_line) + '\n')
+
+            ret.append(('default',
+                        sp.Popen(command_line, stdout=sp.PIPE).communicate()[0].strip(),))
+
+            if once:
+                return ret
+
+            for uri in self._uris:
+                if re.match(r'^https?\://default$', uri):
+                    continue
+
+                command_line = ['drush', '--uri=%s' % (uri)]
+
+                if not self._verbose:
+                    command_line.append('-q')
+
+                command_line.extend(split)
+
+                if self._verbose and self._stdout:
+                    self._stdout.write(' '.join(command_line) + '\n')
+
+                ret.append((uri,
+                            sp.Popen(command_line, stdout=sp.PIPE).communicate()[0].strip(),))
+
+            return ret
+
     def add_uri(self, uri):
         if uri in self._uris:
             return
