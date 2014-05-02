@@ -189,7 +189,7 @@ class Drush:
             if once:
                 return
 
-            for uri in self._uris:
+            for uri in set(self._uris):
                 if re.match(r'^https?\://default$', uri):
                     continue
 
@@ -230,7 +230,7 @@ class Drush:
             if once:
                 return ret
 
-            for uri in self._uris:
+            for uri in set(self._uris):
                 if re.match(r'^https?\://default$', uri):
                     continue
 
