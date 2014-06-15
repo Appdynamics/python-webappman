@@ -12,9 +12,10 @@ setup(
     long_description=open('README.rst').read(),
     scripts=['bin/wam-install-drupal', 'bin/wam-install-wordpress'],
     install_requires=[
-        'beautifulsoup4',
-        'httpext',
-        'langutil',
-        'osextension',
+        'beautifulsoup4==4.3.2',
+        'httpext>=0.1.3',
+        'langutil>=0.1.4',
+        'osextension>=0.1.2',
+        'sh==1.09',
     ],
 )
