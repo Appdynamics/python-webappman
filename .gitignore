@@ -2,6 +2,7 @@ MANIFEST
 build
 dist
 *~
-.desktop
+.directory
 .kdev4/
 *.pyc
+

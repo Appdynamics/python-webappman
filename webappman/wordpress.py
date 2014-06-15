@@ -15,7 +15,7 @@ class WordPressError(Exception):
     pass
 
 
-class WordPressConfigError(WordPressError):
+class WordPressConfigurationError(WordPressError):
     pass
 
 
@@ -31,7 +31,6 @@ class WordPress:
 
     def __init__(self, path):
         """
-
         Args:
             path (str): Path to installation. Does not have to exist as
               init_dir() can be used to initialise a new installation.
@@ -54,7 +53,7 @@ class WordPress:
             table_prefix (str): Table prefix.
 
         Raises:
-            WordPressError, WordPressConfigError
+            WordPressError, WordPressConfigurationError
 
         Optional ``config`` keys (all str):
             db_host: Database host.
@@ -124,7 +123,7 @@ class WordPress:
             elif key in defaults:
                 value = defaults[key]
             else:
-                raise WordPressConfigError('Configuration key %s is required' %
+                raise WordPressConfigurationError('Configuration key %s is required' %
                                            (key))
 
             wp_config_php.append(line_format %

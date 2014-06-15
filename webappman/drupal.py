@@ -1,6 +1,12 @@
 #coding: utf-8
 """For Drupal site deployment and management"""
 
+from __future__ import print_function
+from bs4 import BeautifulSoup as Soup
+try:
+    from http.cookiejar import CookieJar
+except ImportError:
+    from cookielib import CookieJar
 from os import remove as rm
 from os.path import isdir, join as path_join, realpath, basename
 from pipes import quote as shell_quote
@@ -11,6 +17,12 @@ import json
 import os
 import re
 import subprocess as sp
+try:
+    from urllib.parse import urlencode
+    from urllib.request import build_opener, HTTPCookieProcessor
+except ImportError:
+    from urllib import urlencode
+    from urllib2 import build_opener, HTTPCookieProcessor
 
 from osext.filesystem import sync as dir_sync, isfile
 from osext.pushdcontext import pushd
@@ -118,6 +130,7 @@ class Drush:
     _verbose = False
     _stdout = None
     _uris = []
+    _cookie_processor = None
 
     def __init__(self, path, verbose=False, stdout=None):
         """
@@ -176,7 +189,7 @@ class Drush:
             if once:
                 return
 
-            for uri in self._uris:
+            for uri in set(self._uris):
                 if re.match(r'^https?\://default$', uri):
                     continue
 
@@ -195,6 +208,46 @@ class Drush:
                 except sp.CalledProcessError as e:
                     if not ignore_errors:
                         raise e
+
+    def command_output(self, string_as_is, once=False):
+        """Like command() but returns the output, in a list format:
+             [(site_name, stripped_data)]"""
+        with pushd(self._path):
+            split = shell_split(string_as_is)
+            command_line = ['drush']
+            ret = []
+
+            if not self._verbose:
+                command_line.append('-q')
+
+            command_line.extend(split)
+            if self._verbose and self._stdout:
+                self._stdout.write(' '.join(command_line) + '\n')
+
+            ret.append(('default',
+                        sp.Popen(command_line, stdout=sp.PIPE).communicate()[0].strip(),))
+
+            if once:
+                return ret
+
+            for uri in set(self._uris):
+                if re.match(r'^https?\://default$', uri):
+                    continue
+
+                command_line = ['drush', '--uri=%s' % (uri)]
+
+                if not self._verbose:
+                    command_line.append('-q')
+
+                command_line.extend(split)
+
+                if self._verbose and self._stdout:
+                    self._stdout.write(' '.join(command_line) + '\n')
+
+                ret.append((uri,
+                            sp.Popen(command_line, stdout=sp.PIPE).communicate()[0].strip(),))
+
+            return ret
 
     def add_uri(self, uri):
         if uri in self._uris:
@@ -243,7 +296,7 @@ class Drush:
 
             os.makedirs(path_join(self._path, 'sites', 'default', 'files',
                                   'tmp'),
-                        0770)
+                        504)  # 0770, or 0o770 in Python 3
 
     def create_libraries_dir(self):
         """Creates the sites/all/libraries directory. Root path must exist."""
@@ -491,13 +544,82 @@ class Drush:
             path = path_join(self._path, file_name)
             os.remove(path)
 
+    #def _init_browser():
+        #if self._cookie_processor:
+            #return
 
-def is_production():
+        #cookie_jar = CookieJar()
+        #self._cookie_processor = HTTPCookieProcessor(cookie_jar)
+
+    #def get_urlopener(self):
+        #self._init_browser()
+        #return build_opener(self._cookie_processor)
+
+    #def _get_session(self,
+                     #username,
+                     #password,
+                     #protocol='http',
+                     #add_headers=None):
+        #opener = self.get_urlopener()
+        #opener.add_headers = headers
+
+        ## Login data
+        #data = [
+            #('name', username),
+            #('pass', password),
+            #('op', 'Log in'),
+        #]
+
+        ## Get CSRF
+        #response = opener.open('%s://%s/user' % (protocol, host))
+        #soup = Soup(response.read(), 'html5lib')
+        #hiddens = soup.body.sellect('#user-login input[type="hidden"]')
+        #for field in hiddens:
+            #data.append((field['name'], field['value']))
+
+        ## Perform login
+        #data = urlencode(data).encode('utf-8')
+        #response = opener.open('%s://%s/user', data=data)
+        #soup = Soup(response.read(), 'html5lib')
+
+        #try:
+            #if soup.body.select('#page-title')[0].contents[0] != username:
+                #raise DrupalError('Failed to log in')
+        #except IndexError:
+            #raise DrupalError('Failed to log in')
+
+    #def post_form(self,
+                  #username,
+                  #password,
+                  #path,
+                  #data=None,
+                  #uris=None,
+                  #add_headers=None):
+        #self._get_session(add_headers=add_headers)
+
+
+def is_production(info_file='/etc/node_type'):
     """Based on DRUPAL_ENV environment variable, determines if the server is in
-         production mode."""
+         production mode.
+
+    Also can read the first line from a specified file to determine if the
+      string (lower-cased) == 'prod'.
+
+    Arguments:
+    info_file -- File to read from for environment type. For this function to
+      return ``True``, the file's first line must say ``prod`` exactly. If the
+      file cannot be opened, the environment variable ``DRUPAL_ENV`` will be
+      checked for.
+    """
     try:
-        if os.environ['DRUPAL_ENV'] == 'prod':
-            return True
+        with open('/etc/node_type') as f:
+            for line in f.readlines():
+                return line.strip().lower() == 'prod'
+    except IOError:
+        pass
+
+    try:
+        return os.environ['DRUPAL_ENV'] == 'prod'
     except KeyError:
         pass
 

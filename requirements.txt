@@ -1,0 +1,4 @@
+beautifulsoup4
+httpext
+osextension
+langutil
