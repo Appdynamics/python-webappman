@@ -11,4 +11,10 @@ setup(
     description='Management of common web apps (Drupal, WordPress).',
     long_description=open('README.rst').read(),
     scripts=['bin/wam-install-drupal', 'bin/wam-install-wordpress'],
+    install_requires=[
+        'beautifulsoup4',
+        'httpext',
+        'langutil',
+        'osextension',
+    ],
 )
